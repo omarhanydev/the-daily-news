@@ -13,6 +13,9 @@ import {
   useMediaQuery,
   Autocomplete,
   Checkbox,
+  Select,
+  MenuItem,
+  Stack,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -121,10 +124,41 @@ const Searchbar = () => {
         <Box sx={{ p: 2 }}>
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12, md: 6 }}>
-              <DatePicker
-                slotProps={{ textField: { fullWidth: true } }}
-                label="Date"
-              />
+              <Stack direction="row">
+                <DatePicker
+                  disabled={true}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      InputProps: {
+                        sx: {
+                          borderTopRightRadius: 0,
+                          borderBottomRightRadius: 0,
+                        },
+                      },
+                    },
+                  }}
+                  label="Date"
+                />
+                <Select
+                  value="latest"
+                  sx={{
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderLeft: "none",
+                    },
+                  }}
+                >
+                  <MenuItem value="latest">Latest</MenuItem>
+                  <MenuItem value="past-hour">Past hour</MenuItem>
+                  <MenuItem value="past-day">Past 24 hours</MenuItem>
+                  <MenuItem value="past-week">Past week</MenuItem>
+                  <MenuItem value="past-month">Past month</MenuItem>
+                  <MenuItem value="past-year">Past year</MenuItem>
+                  <MenuItem value="custom">Custom date</MenuItem>
+                </Select>
+              </Stack>
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
               <Autocomplete
