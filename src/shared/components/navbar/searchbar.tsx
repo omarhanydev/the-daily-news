@@ -16,6 +16,7 @@ import {
   Select,
   MenuItem,
   Stack,
+  createFilterOptions,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -165,6 +166,7 @@ const Searchbar = () => {
                 multiple
                 options={testData}
                 disableCloseOnSelect
+                clearOnBlur
                 renderOption={(props, option, { selected }) => {
                   const { key, ...optionProps } = props;
                   return (
@@ -189,6 +191,26 @@ const Searchbar = () => {
                 multiple
                 options={testData}
                 disableCloseOnSelect
+                freeSolo
+                clearOnBlur
+                filterOptions={(options, params) => {
+                  const filter = createFilterOptions<{
+                    label: string;
+                    id: number;
+                  }>();
+                  const filtered = filter(options, params);
+                  const { inputValue } = params;
+                  const isExisting = options.some(
+                    (option) => inputValue === option.label
+                  );
+                  if (inputValue !== "" && !isExisting) {
+                    filtered.push({
+                      label: inputValue,
+                      id: -1,
+                    });
+                  }
+                  return filtered;
+                }}
                 renderOption={(props, option, { selected }) => {
                   const { key, ...optionProps } = props;
                   return (
@@ -213,6 +235,26 @@ const Searchbar = () => {
                 multiple
                 options={testData}
                 disableCloseOnSelect
+                freeSolo
+                clearOnBlur
+                filterOptions={(options, params) => {
+                  const filter = createFilterOptions<{
+                    label: string;
+                    id: number;
+                  }>();
+                  const filtered = filter(options, params);
+                  const { inputValue } = params;
+                  const isExisting = options.some(
+                    (option) => inputValue === option.label
+                  );
+                  if (inputValue !== "" && !isExisting) {
+                    filtered.push({
+                      label: inputValue,
+                      id: -1,
+                    });
+                  }
+                  return filtered;
+                }}
                 renderOption={(props, option, { selected }) => {
                   const { key, ...optionProps } = props;
                   return (
