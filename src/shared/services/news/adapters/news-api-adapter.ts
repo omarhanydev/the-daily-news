@@ -22,7 +22,7 @@ export class NewsApiAdapter extends BaseAdapter<NewsApiResponse> {
     );
   }
 
-  async fetchFilter(params: BaseAdapterFetchParams): Promise<Response> {
+  async fetchFiltered(params: BaseAdapterFetchParams): Promise<Response> {
     return fetch(
       `https://newsapi.org/v2/everything?apiKey=${this.apiKey}${
         params.fromDate ? `&from=${this.processDate(params.fromDate)}` : ""

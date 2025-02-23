@@ -3,9 +3,9 @@ import { Article } from "@/shared/services/news/types";
 interface SearchbarInitialState {
   showSearchBar: boolean;
   feedSaved: boolean;
-  categories: string[];
-  sources: string[];
-  authors: string[];
+  categories: { label: string; id: string }[];
+  sources: { label: string; id: string }[];
+  authors: { label: string; id: string }[];
   filteredArticles: Article[];
   quickFilterCategoryName: string;
   activeFilters: {
@@ -21,7 +21,11 @@ const initialState: SearchbarInitialState = {
   showSearchBar: false,
   feedSaved: false,
   categories: [],
-  sources: [],
+  sources: [
+    { label: "The Guardian", id: "the-guardian" },
+    { label: "NY Times", id: "ny-times" },
+    { label: "News API", id: "news-api" },
+  ],
   authors: [],
   filteredArticles: [],
   quickFilterCategoryName: "",
@@ -41,13 +45,22 @@ const searchbarSlice = createSlice({
     setShowSearchBar: (state, action: PayloadAction<boolean>) => {
       state.showSearchBar = action.payload;
     },
-    setCategories: (state, action: PayloadAction<string[]>) => {
+    setCategories: (
+      state,
+      action: PayloadAction<SearchbarInitialState["categories"]>
+    ) => {
       state.categories = action.payload;
     },
-    setSources: (state, action: PayloadAction<string[]>) => {
+    setSources: (
+      state,
+      action: PayloadAction<SearchbarInitialState["sources"]>
+    ) => {
       state.sources = action.payload;
     },
-    setAuthors: (state, action: PayloadAction<string[]>) => {
+    setAuthors: (
+      state,
+      action: PayloadAction<SearchbarInitialState["authors"]>
+    ) => {
       state.authors = action.payload;
     },
     setFilteredArticles: (state, action: PayloadAction<Article[]>) => {

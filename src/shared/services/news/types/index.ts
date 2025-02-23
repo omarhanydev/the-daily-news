@@ -3,13 +3,19 @@ export abstract class BaseAdapter<T = any> {
   name: string;
   id: string;
   apiKey: string;
-  processor: (data: T) => Promise<Article[]>;
+  processor: (
+    data: T,
+    type: "article" | "category" | "author"
+  ) => Promise<Article[] | { label: string; id: string }[]>;
 
   constructor(
     name: string,
     id: string,
     apiKey: string,
-    processor: (data: T) => Promise<Article[]>
+    processor: (
+      data: T,
+      type: "article" | "category" | "author"
+    ) => Promise<Article[] | { label: string; id: string }[]>
   ) {
     if (!apiKey) {
       throw new Error("API key is required");
@@ -21,7 +27,9 @@ export abstract class BaseAdapter<T = any> {
   }
 
   abstract fetchLatest(): Promise<Response>;
-  abstract fetchFilter(params: BaseAdapterFetchParams): Promise<Response>;
+  abstract fetchFiltered(params: BaseAdapterFetchParams): Promise<Response>;
+  abstract fetchCategories?(params?: BaseAdapterFetchParams): Promise<Response>;
+  abstract fetchAuthors?(params?: BaseAdapterFetchParams): Promise<Response>;
 }
 
 export type BaseAdapterFetchParams = {
@@ -98,6 +106,31 @@ type TheGuardianArticleTag = {
   firstName?: string;
   lastName?: string;
   twitterHandle?: string;
+};
+
+export type TheGuardianCategoriesResponse = {
+  response: {
+    status: string;
+    userTier: string;
+    total: number;
+    results: TheGuardianCategoriesResult[];
+  };
+};
+
+type TheGuardianCategoriesResult = {
+  id: string;
+  webTitle: string;
+  webUrl: string;
+  apiUrl: string;
+  editions: TheGuardianCategoriesEdition[];
+};
+
+type TheGuardianCategoriesEdition = {
+  id: string;
+  webTitle: string;
+  webUrl: string;
+  apiUrl: string;
+  code: string;
 };
 
 // Ny Times

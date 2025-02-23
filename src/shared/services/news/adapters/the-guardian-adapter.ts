@@ -22,7 +22,7 @@ export class TheGuardianAdapter extends BaseAdapter<TheGuardianResponse> {
     );
   }
 
-  async fetchFilter(params: BaseAdapterFetchParams): Promise<Response> {
+  async fetchFiltered(params: BaseAdapterFetchParams): Promise<Response> {
     return fetch(
       `https://content.guardianapis.com/search?api-key=${
         this.apiKey
@@ -36,20 +36,20 @@ export class TheGuardianAdapter extends BaseAdapter<TheGuardianResponse> {
     );
   }
 
-  async fetchCategories(params: BaseAdapterFetchParams): Promise<Response> {
+  async fetchCategories(params?: BaseAdapterFetchParams): Promise<Response> {
     return fetch(
       `https://content.guardianapis.com/sections?api-key=${this.apiKey}${
-        params.keyword ? `&q=${params.keyword}` : ""
+        params?.keyword ? `&q=${params.keyword}` : ""
       }`
     );
   }
 
-  async fetchAuthors(params: BaseAdapterFetchParams): Promise<Response> {
+  async fetchAuthors(params?: BaseAdapterFetchParams): Promise<Response> {
     return fetch(
       `https://content.guardianapis.com/tags?api-key=${
         this.apiKey
       }&type=contributor&page-size=1000${
-        params.keyword ? `&q=${params.keyword}` : ""
+        params?.keyword ? `&q=${params.keyword}` : ""
       }`
     );
   }

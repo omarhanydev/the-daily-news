@@ -22,7 +22,7 @@ export class NyTimesAdapter extends BaseAdapter<NyTimesResponse> {
     );
   }
 
-  async fetchFilter(params: BaseAdapterFetchParams): Promise<Response> {
+  async fetchFiltered(params: BaseAdapterFetchParams): Promise<Response> {
     return fetch(
       `https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=${
         this.apiKey

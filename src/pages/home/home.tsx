@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { Container, Stack } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -7,47 +7,19 @@ import {
   HomeNavbar,
 } from "@/features/home/components";
 import { AppDispatch, RootState } from "@/shared/stores";
-import {
-  setFilteredArticles,
-  setShowSearchBar,
-} from "@/shared/stores/searchbar-slice";
-import { newsService } from "@/shared/services/news/news-service";
-import toast from "react-hot-toast";
-import { Article } from "@/shared/services/news/types";
+import { setShowSearchBar } from "@/shared/stores/searchbar-slice";
+import { useNewsService } from "@/shared/hooks";
 
 const Home = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { feedSaved } = useSelector((state: RootState) => state.searchbar);
-
-  const fetchLatestNews = useCallback(async () => {
-    const responses = await newsService.fetchLatestNews();
-    responses.map((r) => {
-      if (r.status === "rejected") {
-        toast.error(
-          `Error fetching news from ${r.reason.adapter.name}, ${r.reason.statusText}`
-        );
-      }
-    });
-    if (responses.every((r) => r.status === "fulfilled")) {
-      toast.success("News fetched successfully");
-    }
-    const filteredArticles: Article[] = responses
-      .filter((r) => r.status === "fulfilled")
-      .reduce((acc, curr) => [...acc, ...curr.value], [] as Article[])
-      .sort((a, b) => {
-        return (
-          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-        );
-      });
-    dispatch(setFilteredArticles(filteredArticles));
-  }, [dispatch]);
-
+  const { updateNews } = useNewsService();
   useEffect(() => {
     dispatch(setShowSearchBar(true));
     if (!feedSaved) {
-      fetchLatestNews();
+      updateNews();
     }
-  }, [dispatch, feedSaved, fetchLatestNews]);
+  }, [dispatch, feedSaved, updateNews]);
 
   return (
     <>

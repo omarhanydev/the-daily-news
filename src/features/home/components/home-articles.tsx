@@ -52,7 +52,7 @@ const HomeArticles = () => {
                   textDecoration: "none",
                   height: "100%",
                   borderRadius: "16px",
-                  boxShadow: "0 0 2px 1px rgba(0, 0, 0, 0.03)",
+                  boxShadow: "0 0 2px 1px rgba(0, 0, 0, 0.02)",
                   "&:hover": {
                     boxShadow:
                       "0 0 0 2px #1989fa, 0 0 12px 3px rgba(0, 0, 0, 0.1)",
