@@ -3,27 +3,30 @@ import AllInclusiveIcon from "@mui/icons-material/AllInclusive";
 import { useSelector } from "react-redux";
 import { RootState } from "@/shared/stores";
 import { useMemo } from "react";
+import { useDispatch } from "react-redux";
+import { setQuickFilterCategoryName } from "@/shared/stores/searchbar-slice";
+
 const HomeNavbar = () => {
-  const { filteredArticles } = useSelector(
+  const dispatch = useDispatch();
+  const { filteredArticles, quickFilterCategoryName } = useSelector(
     (state: RootState) => state.searchbar
   );
 
   const computedCategories = useMemo(() => {
     const categories = [
       ...new Set([
-        ...filteredArticles
-          .filter((article) => article.category)
-          .map((article) => article.category),
+        ...filteredArticles.map((article) => article.category || "Other"),
       ]),
     ];
     return categories.map((category) => ({
       label: category,
-      count: filteredArticles.filter((article) => article.category === category)
-        .length,
+      count: filteredArticles.filter((article) =>
+        category !== "Other"
+          ? article.category === category
+          : !article?.category
+      ).length,
     }));
   }, [filteredArticles]);
-
-  console.log(computedCategories);
 
   return (
     <AppBar
@@ -37,7 +40,10 @@ const HomeNavbar = () => {
       <Container maxWidth="xl" sx={{ paddingX: { xs: 0, md: "24px" } }}>
         <Toolbar variant="dense" disableGutters sx={{ minHeight: "unset" }}>
           <Tabs
-            value={0}
+            value={quickFilterCategoryName}
+            onChange={(_e: React.SyntheticEvent, value: string) => {
+              dispatch(setQuickFilterCategoryName(value));
+            }}
             variant="scrollable"
             scrollButtons="auto"
             TabScrollButtonProps={{
@@ -70,6 +76,7 @@ const HomeNavbar = () => {
             TabIndicatorProps={{ sx: { backgroundColor: "#f15008" } }}
           >
             <Tab
+              value=""
               sx={{
                 minHeight: "unset",
                 textTransform: "none",
@@ -82,6 +89,7 @@ const HomeNavbar = () => {
             {computedCategories.map((category) => (
               <Tab
                 key={category.label}
+                value={category.label}
                 sx={{
                   minHeight: "unset",
                   textTransform: "none",

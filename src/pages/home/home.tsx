@@ -35,11 +35,11 @@ const Home = () => {
       .filter((r) => r.status === "fulfilled")
       .reduce((acc, curr) => [...acc, ...curr.value], [] as Article[])
       .sort((a, b) => {
-        return new Date(b.publishedAt).getTime() -
-          new Date(a.publishedAt).getTime()
+        return (
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
       });
     dispatch(setFilteredArticles(filteredArticles));
-    console.log("filteredArticles", filteredArticles);
   }, [dispatch]);
 
   useEffect(() => {

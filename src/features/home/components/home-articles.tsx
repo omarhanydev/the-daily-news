@@ -7,22 +7,44 @@ import {
   Link,
   CardMedia,
   CardActions,
+  Button,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "@/shared/stores";
 import dayjs from "dayjs";
+import { useMemo } from "react";
 
 const HomeArticles = () => {
-  const { filteredArticles } = useSelector(
+  const { filteredArticles, quickFilterCategoryName } = useSelector(
     (state: RootState) => state.searchbar
   );
+
+  const computedFilteredArticles = useMemo(() => {
+    return filteredArticles.filter((article) => {
+      if (quickFilterCategoryName === "") {
+        return true;
+      }
+      if (quickFilterCategoryName === "Other") {
+        return !article?.category;
+      }
+      return article?.category === quickFilterCategoryName;
+    });
+  }, [filteredArticles, quickFilterCategoryName]);
 
   return (
     <>
       <Box sx={{ pb: 3 }}>
         <Grid2 container spacing={2}>
-          {filteredArticles.map((article, index) => (
-            <Grid2 size={{ xs: 12, md: index < 3 ? 4 : 3 }} key={article.id}>
+          {computedFilteredArticles.map((article, index) => (
+            <Grid2
+              size={{
+                xs: 12,
+                sm: 6,
+                md: 4,
+                lg: index == 0 && quickFilterCategoryName === "" ? 6 : 3,
+              }}
+              key={article.id}
+            >
               <Card
                 sx={{
                   display: "flex",
@@ -30,6 +52,7 @@ const HomeArticles = () => {
                   textDecoration: "none",
                   height: "100%",
                   borderRadius: "16px",
+                  boxShadow: "0 0 2px 1px rgba(0, 0, 0, 0.03)",
                   "&:hover": {
                     boxShadow:
                       "0 0 0 2px #1989fa, 0 0 12px 3px rgba(0, 0, 0, 0.1)",
@@ -79,7 +102,14 @@ const HomeArticles = () => {
                     {article.description}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ marginTop: "auto", padding: 2 }}>
+                <CardActions
+                  sx={{
+                    marginTop: "auto",
+                    padding: 2,
+                    gap: 2,
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Typography
                     variant="caption"
                     sx={{ mt: 1, display: "block" }}
@@ -87,6 +117,13 @@ const HomeArticles = () => {
                     {dayjs(article.publishedAt).fromNow()} • {article.source}
                     {article.author && ` • By ${article.author}`}
                   </Typography>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    sx={{ flexShrink: 0, textTransform: "none" }}
+                  >
+                    Read More
+                  </Button>
                 </CardActions>
               </Card>
             </Grid2>

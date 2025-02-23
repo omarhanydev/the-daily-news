@@ -7,6 +7,7 @@ interface SearchbarInitialState {
   sources: string[];
   authors: string[];
   filteredArticles: Article[];
+  quickFilterCategoryName: string;
   activeFilters: {
     keyword: string | null;
     date: string | null;
@@ -23,6 +24,7 @@ const initialState: SearchbarInitialState = {
   sources: [],
   authors: [],
   filteredArticles: [],
+  quickFilterCategoryName: "",
   activeFilters: {
     keyword: null,
     date: null,
@@ -60,6 +62,9 @@ const searchbarSlice = createSlice({
     setFeedSaved: (state, action: PayloadAction<boolean>) => {
       state.feedSaved = action.payload;
     },
+    setQuickFilterCategoryName: (state, action: PayloadAction<string>) => {
+      state.quickFilterCategoryName = action.payload;
+    },
   },
 });
 
@@ -71,6 +76,7 @@ export const {
   setFilteredArticles,
   setActiveFilters,
   setFeedSaved,
+  setQuickFilterCategoryName,
 } = searchbarSlice.actions;
 
 export default searchbarSlice.reducer;
