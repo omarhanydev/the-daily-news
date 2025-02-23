@@ -1,7 +1,30 @@
 import { Toolbar, Tab, Tabs, Container, AppBar } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
-
+import AllInclusiveIcon from "@mui/icons-material/AllInclusive";
+import { useSelector } from "react-redux";
+import { RootState } from "@/shared/stores";
+import { useMemo } from "react";
 const HomeNavbar = () => {
+  const { filteredArticles } = useSelector(
+    (state: RootState) => state.searchbar
+  );
+
+  const computedCategories = useMemo(() => {
+    const categories = [
+      ...new Set([
+        ...filteredArticles
+          .filter((article) => article.category)
+          .map((article) => article.category),
+      ]),
+    ];
+    return categories.map((category) => ({
+      label: category,
+      count: filteredArticles.filter((article) => article.category === category)
+        .length,
+    }));
+  }, [filteredArticles]);
+
+  console.log(computedCategories);
+
   return (
     <AppBar
       position="static"
@@ -52,154 +75,21 @@ const HomeNavbar = () => {
                 textTransform: "none",
                 "&.Mui-selected": { color: "#f15008" },
               }}
-              icon={<HomeIcon />}
+              icon={<AllInclusiveIcon />}
               iconPosition="start"
-              label="Home"
+              label={`All (${filteredArticles.length})`}
             />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Two"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Three"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Four"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Five"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Six"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Seven"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Two"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Three"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Four"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Five"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Six"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Seven"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Two"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Three"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Four"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Five"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Six"
-            />
-            <Tab
-              sx={{
-                minHeight: "unset",
-                textTransform: "none",
-                "&.Mui-selected": { color: "#f15008" },
-              }}
-              label="Item Seven"
-            />
+            {computedCategories.map((category) => (
+              <Tab
+                key={category.label}
+                sx={{
+                  minHeight: "unset",
+                  textTransform: "none",
+                  "&.Mui-selected": { color: "#f15008" },
+                }}
+                label={`${category.label} (${category.count})`}
+              />
+            ))}
           </Tabs>
         </Toolbar>
       </Container>
