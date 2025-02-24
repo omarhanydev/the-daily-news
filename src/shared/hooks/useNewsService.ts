@@ -5,24 +5,50 @@ import {
   setCategories,
   setAuthors,
   setFilteredArticles,
+  setIsLoading,
 } from "@/shared/stores/searchbar-slice";
 import { newsService } from "@/shared/services/news/news-service";
 import { Article, BaseAdapterFetchParams } from "@/shared/services/news/types";
 import toast from "react-hot-toast";
+import { processFiltersToServiceFilters } from "../utils";
 
 const useNewsService = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const updateNews = useCallback(
     async (filters?: BaseAdapterFetchParams) => {
-      const responses = await (filters
-        ? newsService.fetchFilteredNews(filters)
-        : newsService.fetchLatestNews());
+      dispatch(setIsLoading(true));
+      const filtersAreEmpty = (filters: BaseAdapterFetchParams) => {
+        return (
+          JSON.stringify(filters) ===
+          JSON.stringify({
+            keyword: "",
+            customDate: null,
+            dateType: "latest",
+            sources: [
+              { label: "The Guardian", id: "the-guardian" },
+              { label: "NY Times", id: "ny-times" },
+              { label: "News API", id: "news-api" },
+            ],
+            category: "",
+            author: "",
+          })
+        );
+      };
+
+      const responses = await (filtersAreEmpty(filters)
+        ? newsService.fetchLatestNews(filters?.sources.map((s) => s.id))
+        : newsService.fetchFilteredNews(
+            processFiltersToServiceFilters(filters),
+            filters?.sources.map((s) => s.id)
+          ));
 
       responses.map((r) => {
         if (r.status === "rejected") {
           toast.error(
-            `Error fetching news from ${r.reason.adapter.name}, ${r.reason.statusText}`
+            `Error fetching news from ${r.reason.adapter.name}, ${
+              r.reason.statusText || r.reason?.data?.message
+            }`
           );
         }
       });
@@ -41,64 +67,79 @@ const useNewsService = () => {
           );
         });
 
+      dispatch(setIsLoading(false));
       dispatch(setFilteredArticles(filteredArticles));
     },
     [dispatch]
   );
 
-  const updateCategories = useCallback(async () => {
-    const responses = await newsService.fetchCategories();
+  const updateCategories = useCallback(
+    async (filters?: BaseAdapterFetchParams) => {
+      const responses = await newsService.fetchCategories(
+        filters?.sources.map((s) => s.id)
+      );
 
-    responses.map((r) => {
-      if (r.status === "rejected") {
-        toast.error(
-          `Error fetching categories from ${r.reason.adapter.name}, ${r.reason.statusText}`
-        );
+      responses.map((r) => {
+        if (r.status === "rejected") {
+          toast.error(
+            `Error fetching categories from ${r.reason.adapter.name}, ${
+              r.reason.statusText || r.reason?.data?.message
+            }`
+          );
+        }
+      });
+
+      if (responses.every((r) => r.status === "fulfilled")) {
+        toast.success("Categories fetched successfully");
       }
-    });
 
-    if (responses.every((r) => r.status === "fulfilled")) {
-      toast.success("Categories fetched successfully");
-    }
+      const mergedCategories = [
+        ...new Map(
+          responses
+            .filter((r) => r.status === "fulfilled")
+            .reduce((acc, curr) => [...acc, ...curr.value], [])
+            .map((item) => [item.id, item])
+        ).values(),
+      ];
 
-    const mergedCategories = [
-      ...new Map(
-        responses
-          .filter((r) => r.status === "fulfilled")
-          .reduce((acc, curr) => [...acc, ...curr.value], [])
-          .map((item) => [item.id, item])
-      ).values(),
-    ];
+      dispatch(setCategories(mergedCategories));
+    },
+    [dispatch]
+  );
 
-    dispatch(setCategories(mergedCategories));
-  }, [dispatch]);
+  const updateAuthors = useCallback(
+    async (filters?: BaseAdapterFetchParams) => {
+      const responses = await newsService.fetchAuthors(
+        filters?.sources.map((s) => s.id)
+      );
 
-  const updateAuthors = useCallback(async () => {
-    const responses = await newsService.fetchAuthors();
+      responses.map((r) => {
+        if (r.status === "rejected") {
+          toast.error(
+            `Error fetching authors from ${r.reason.adapter.name}, ${
+              r.reason.statusText || r.reason?.data?.message
+            }`
+          );
+        }
+      });
 
-    responses.map((r) => {
-      if (r.status === "rejected") {
-        toast.error(
-          `Error fetching authors from ${r.reason.adapter.name}, ${r.reason.statusText}`
-        );
+      if (responses.every((r) => r.status === "fulfilled")) {
+        toast.success("Authors fetched successfully");
       }
-    });
 
-    if (responses.every((r) => r.status === "fulfilled")) {
-      toast.success("Authors fetched successfully");
-    }
+      const mergedAuthors = [
+        ...new Map(
+          responses
+            .filter((r) => r.status === "fulfilled")
+            .reduce((acc, curr) => [...acc, ...curr.value], [])
+            .map((item) => [item.id, item])
+        ).values(),
+      ];
 
-    const mergedAuthors = [
-      ...new Map(
-        responses
-          .filter((r) => r.status === "fulfilled")
-          .reduce((acc, curr) => [...acc, ...curr.value], [])
-          .map((item) => [item.id, item])
-      ).values(),
-    ];
-
-    dispatch(setAuthors(mergedAuthors));
-  }, [dispatch]);
+      dispatch(setAuthors(mergedAuthors));
+    },
+    [dispatch]
+  );
 
   return { updateNews, updateCategories, updateAuthors };
 };

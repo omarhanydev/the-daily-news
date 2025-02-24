@@ -1,6 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Article } from "@/shared/services/news/types";
+import { Dayjs } from "dayjs";
+import { getFeedSavedFiltersFromLocalStorage } from "../utils";
 interface SearchbarInitialState {
+  isLoading: boolean;
   showSearchBar: boolean;
   feedSaved: boolean;
   categories: { label: string; id: string }[];
@@ -10,16 +13,20 @@ interface SearchbarInitialState {
   quickFilterCategoryName: string;
   activeFilters: {
     keyword: string | null;
-    date: string | null;
-    category: string | null;
-    source: string | null;
-    author: string | null;
+    customDate: Dayjs | null | string | undefined;
+    dateType: string | null;
+    sources: { label: string; id: string }[];
+    category: { label: string; id: string } | string | null;
+    author: { label: string; id: string } | string | null;
   };
 }
 
+const feedSavedFiltersInLocalStorage = getFeedSavedFiltersFromLocalStorage();
+
 const initialState: SearchbarInitialState = {
+  isLoading: false,
   showSearchBar: false,
-  feedSaved: false,
+  feedSaved: feedSavedFiltersInLocalStorage ? true : false,
   categories: [],
   sources: [
     { label: "The Guardian", id: "the-guardian" },
@@ -29,12 +36,17 @@ const initialState: SearchbarInitialState = {
   authors: [],
   filteredArticles: [],
   quickFilterCategoryName: "",
-  activeFilters: {
-    keyword: null,
-    date: null,
-    category: null,
-    source: null,
-    author: null,
+  activeFilters: feedSavedFiltersInLocalStorage || {
+    keyword: "",
+    customDate: null,
+    dateType: "latest",
+    sources: [
+      { label: "The Guardian", id: "the-guardian" },
+      { label: "NY Times", id: "ny-times" },
+      { label: "News API", id: "news-api" },
+    ],
+    category: "",
+    author: "",
   },
 };
 
@@ -42,6 +54,9 @@ const searchbarSlice = createSlice({
   name: "searchbar",
   initialState,
   reducers: {
+    setIsLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
     setShowSearchBar: (state, action: PayloadAction<boolean>) => {
       state.showSearchBar = action.payload;
     },
@@ -82,6 +97,7 @@ const searchbarSlice = createSlice({
 });
 
 export const {
+  setIsLoading,
   setShowSearchBar,
   setCategories,
   setSources,

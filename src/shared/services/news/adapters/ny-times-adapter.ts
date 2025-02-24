@@ -52,7 +52,7 @@ export class NyTimesAdapter extends BaseAdapter<NyTimesResponse> {
     };
     const categoryAndAuthorQuery =
       [
-        { type: "category", value: params.category },
+        { type: "category", value: params.category || params.categoryId },
         { type: "author", value: params.author },
       ].reduce<string>((acc, curr) => {
         if (acc == "" && curr.value) {

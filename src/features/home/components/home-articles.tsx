@@ -8,16 +8,26 @@ import {
   CardMedia,
   CardActions,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { RootState } from "@/shared/stores";
+import { RootState, setActiveFilters } from "@/shared/stores";
 import dayjs from "dayjs";
 import { useMemo } from "react";
-
+import ErrorIcon from "@mui/icons-material/Error";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/shared/stores";
+import { useNewsService } from "@/shared/hooks/useNewsService";
 const HomeArticles = () => {
-  const { filteredArticles, quickFilterCategoryName } = useSelector(
-    (state: RootState) => state.searchbar
-  );
+  const dispatch = useDispatch<AppDispatch>();
+  const {
+    filteredArticles,
+    quickFilterCategoryName,
+    activeFilters,
+    isLoading,
+  } = useSelector((state: RootState) => state.searchbar);
+
+  const { updateNews } = useNewsService();
 
   const computedFilteredArticles = useMemo(() => {
     return filteredArticles.filter((article) => {
@@ -128,6 +138,51 @@ const HomeArticles = () => {
               </Card>
             </Grid2>
           ))}
+          {computedFilteredArticles.length === 0 && !isLoading && (
+            <Grid2 size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  textAlign: "center",
+                  background: "white",
+                  maxWidth: "400px",
+                  padding: 4,
+                  borderRadius: "16px",
+                  margin: "0 auto",
+                  color: "text.secondary",
+                }}
+              >
+                <ErrorIcon sx={{ fontSize: 48 }} />
+                <Typography variant="h6">No articles found</Typography>
+                <Button
+                  variant="outlined"
+                  sx={{ mt: 2, textTransform: "none" }}
+                  color="primary"
+                  onClick={() => {
+                    updateNews(activeFilters);
+                  }}
+                >
+                  Try again
+                </Button>
+              </Box>
+            </Grid2>
+          )}
+          {isLoading && (
+            <Grid2 size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  textAlign: "center",
+                  background: "white",
+                  maxWidth: "400px",
+                  padding: 4,
+                  borderRadius: "16px",
+                  margin: "0 auto",
+                  color: "text.secondary",
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            </Grid2>
+          )}
         </Grid2>
       </Box>
     </>

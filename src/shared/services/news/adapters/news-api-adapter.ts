@@ -23,12 +23,20 @@ export class NewsApiAdapter extends BaseAdapter<NewsApiResponse> {
   }
 
   async fetchFiltered(params: BaseAdapterFetchParams): Promise<Response> {
+    if (
+      !params.keyword &&
+      !params.category &&
+      !params.categoryId &&
+      !params.author
+    ) {
+      return this.fetchLatest();
+    }
     return fetch(
       `https://newsapi.org/v2/everything?apiKey=${this.apiKey}${
         params.fromDate ? `&from=${this.processDate(params.fromDate)}` : ""
       }${
         params.toDate ? `&to=${this.processDate(params.toDate)}` : ""
-      }${this.processSearchKeyword(params)}`
+      }${`&q=${this.processKeywordAndCategoryAndAuthor(params)}`}`
     );
   }
 
@@ -36,20 +44,15 @@ export class NewsApiAdapter extends BaseAdapter<NewsApiResponse> {
     return dayjs(date).format("YYYY-MM-DD");
   }
 
-  private processSearchKeyword(params: BaseAdapterFetchParams): string {
-    const searchKeywordQuery =
-      [params.keyword, params.category, params.author].reduce<string>(
-        (acc, curr) => {
-          if (acc == "" && curr) {
-            return `&q=${curr}`;
-          }
-          if (curr) {
-            return `${acc} AND ${curr}`;
-          }
-          return acc;
-        },
-        ""
-      ) || "";
-    return searchKeywordQuery;
+  private processKeywordAndCategoryAndAuthor(
+    params: BaseAdapterFetchParams
+  ): string {
+    return (
+      params.keyword ||
+      params.category ||
+      params.categoryId ||
+      params.author ||
+      ""
+    );
   }
 }

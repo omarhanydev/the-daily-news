@@ -47,57 +47,65 @@ export class NewsService {
     });
   }
 
-  async fetchLatestNews(): Promise<PromiseSettledResult<Article[]>[]> {
+  async fetchLatestNews(
+    adapters: string[]
+  ): Promise<PromiseSettledResult<Article[]>[]> {
     return await Promise.allSettled(
-      this.adapters.map(async (adapter) => {
-        const response = await adapter.fetchLatest();
-        const data = await response.json();
-        if (response.ok) {
-          return await adapter.processor(data);
-        } else {
-          return Promise.reject({
-            status: response.status,
-            statusText: response.statusText,
-            data: data,
-            adapter: {
-              id: adapter.id,
-              name: adapter.name,
-            },
-          });
-        }
-      })
+      this.adapters
+        .filter((adapter) => adapters.includes(adapter.id))
+        .map(async (adapter) => {
+          const response = await adapter.fetchLatest();
+          const data = await response.json();
+          if (response.ok) {
+            return await adapter.processor(data);
+          } else {
+            return Promise.reject({
+              status: response.status,
+              statusText: response.statusText,
+              data: data,
+              adapter: {
+                id: adapter.id,
+                name: adapter.name,
+              },
+            });
+          }
+        })
     );
   }
 
   async fetchFilteredNews(
-    filters: BaseAdapterFetchParams
+    filters: BaseAdapterFetchParams,
+    adapters: string[]
   ): Promise<PromiseSettledResult<Article[]>[]> {
     return await Promise.allSettled(
-      this.adapters.map(async (adapter) => {
-        const response = await adapter.fetchFiltered(filters);
-        const data = await response.json();
-        if (response.ok) {
-          return await adapter.processor(data);
-        } else {
-          return Promise.reject({
-            status: response.status,
-            statusText: response.statusText,
-            data: data,
-            adapter: {
-              id: adapter.id,
-              name: adapter.name,
-            },
-          });
-        }
-      })
+      this.adapters
+        .filter((adapter) => adapters.includes(adapter.id))
+        .map(async (adapter) => {
+          const response = await adapter.fetchFiltered(filters);
+          const data = await response.json();
+          if (response.ok) {
+            return await adapter.processor(data);
+          } else {
+            return Promise.reject({
+              status: response.status,
+              statusText: response.statusText,
+              data: data,
+              adapter: {
+                id: adapter.id,
+                name: adapter.name,
+              },
+            });
+          }
+        })
     );
   }
 
-  async fetchCategories(): Promise<
-    PromiseSettledResult<{ id: string; label: string }[]>
-  > {
+  async fetchCategories(
+    adapters: string[]
+  ): Promise<PromiseSettledResult<{ id: string; label: string }[]>[]> {
     return await Promise.allSettled(
       this.adapters
+        .filter((adapter) => adapters.includes(adapter.id))
         .filter((adapter) => typeof adapter.fetchCategories === "function")
         .map(async (adapter) => {
           if (typeof adapter.fetchCategories === "function") {
@@ -122,11 +130,12 @@ export class NewsService {
     );
   }
 
-  async fetchAuthors(): Promise<
-    PromiseSettledResult<{ id: string; label: string }[]>
-  > {
+  async fetchAuthors(
+    adapters: string[]
+  ): Promise<PromiseSettledResult<{ id: string; label: string }[]>[]> {
     return await Promise.allSettled(
       this.adapters
+        .filter((adapter) => adapters.includes(adapter.id))
         .filter((adapter) => typeof adapter.fetchAuthors === "function")
         .map(async (adapter) => {
           if (typeof adapter.fetchAuthors === "function") {

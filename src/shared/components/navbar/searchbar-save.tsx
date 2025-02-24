@@ -4,18 +4,24 @@ import StarIcon from "@mui/icons-material/Star";
 import { toast } from "react-hot-toast";
 import { RootState, AppDispatch } from "@/shared/stores";
 import { setFeedSaved } from "@/shared/stores/searchbar-slice";
+import { useEffect, useRef } from "react";
 
 const SearchbarSave = () => {
+  // Use ref to check if the feed is being loaded for the first time
+  const firstInitialLoad = useRef(true);
+
   // Get values from the searchbar slice of the Redux store
-  const { feedSaved } = useSelector((state: RootState) => state.searchbar);
+  const { feedSaved, activeFilters } = useSelector(
+    (state: RootState) => state.searchbar
+  );
 
   // Get the dispatch function from the Redux store
   const dispatch = useDispatch<AppDispatch>();
 
-  // Methods
+  // Toggle feed save
   const toggleFeedSave = () => {
-    dispatch(setFeedSaved(!feedSaved));
     if (feedSaved) {
+      localStorage?.removeItem("feedSaved");
       toast.success(
         <Box>
           <Typography variant="h6" sx={{ fontSize: "18px" }}>
@@ -27,20 +33,32 @@ const SearchbarSave = () => {
           </Typography>
         </Box>
       );
-    } else {
+    }
+    dispatch(setFeedSaved(!feedSaved));
+  };
+
+  // Save feed to local storage when filters are updated
+  useEffect(() => {
+    if (feedSaved) {
+      localStorage?.setItem("feedSaved", JSON.stringify(activeFilters));
       toast.success(
-        <Box>
-          <Typography variant="h6" sx={{ fontSize: "18px" }}>
-            Personalized feed saved
-          </Typography>
-          <Typography variant="body2">
-            Next time you open the app, your saved feed will be loaded
-            automatically
-          </Typography>
-        </Box>
+        firstInitialLoad.current ? (
+          "Personalized feed loaded"
+        ) : (
+          <Box>
+            <Typography variant="h6" sx={{ fontSize: "18px" }}>
+              Personalized feed saved
+            </Typography>
+            <Typography variant="body2">
+              Next time you open the app, your saved feed will be loaded
+              automatically
+            </Typography>
+          </Box>
+        )
       );
     }
-  };
+    firstInitialLoad.current = false;
+  }, [activeFilters, feedSaved]);
 
   return (
     <Tooltip title="Save feed">

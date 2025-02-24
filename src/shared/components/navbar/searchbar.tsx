@@ -16,7 +16,6 @@ import {
   Select,
   MenuItem,
   Stack,
-  createFilterOptions,
   debounce,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,155 +24,105 @@ import SearchIcon from "@mui/icons-material/Search";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AppDispatch, RootState, setFilteredArticles } from "@/shared/stores";
+import {
+  AppDispatch,
+  RootState,
+  setActiveFilters,
+  setFeedSaved,
+} from "@/shared/stores";
 import { SearchbarSave } from "./searchbar-save";
-import { newsService } from "@/shared/services/news/news-service";
 import toast from "react-hot-toast";
-import { Article, BaseAdapterFetchParams } from "@/shared/services/news/types";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
+import {
+  processSavedFeedForLocalStorage,
+  getFeedSavedFiltersFromLocalStorage,
+} from "@/shared/utils";
 import { useNewsService } from "@/shared/hooks";
 
 const Searchbar = () => {
-  // Get values from the searchbar slice of the Redux store
-  const dispatch = useDispatch<AppDispatch>();
-  const { showSearchBar, sources, categories, authors } = useSelector(
-    (state: RootState) => state.searchbar
-  );
-
-  // Local state to store the searchbar filters
-  const [searchbarFilters, setSearchbarFilters] = useState<{
-    keyword: string;
-    customDate: Dayjs | null;
-    dateType: string;
-    sources: { label: string; id: string }[];
-    category: { label: string; id: string } | string | null;
-    author: { label: string; id: string } | string | null;
-  }>({
-    keyword: "",
-    customDate: null,
-    dateType: "latest",
-    sources,
-    category: "",
-    author: "",
-  });
+  // Use ref to check if the feed is being loaded for the first time
+  const firstInitialLoad = useRef(true);
 
   // Get the theme and check if the screen is lower than 'md' breakpoint
   const theme = useTheme();
   const mdAndLowerScreens = useMediaQuery(theme.breakpoints.down("md"));
 
-  // Initialize the popover anchor element and the searchbar ref
+  // Initialize the popover anchor element | the searchbar ref that will be used to open the popover full width | computed value to check if the popover is open
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<HTMLElement | null>(
     null
   );
   const searchbarRef = useRef<HTMLFormElement>(null);
-
-  // Computed value to check if the popover is open
   const open = Boolean(popoverAnchorEl);
+
+  // Get the values from the Redux store
+  const {
+    showSearchBar,
+    activeFilters,
+    sources,
+    categories,
+    authors,
+    feedSaved,
+  } = useSelector((state: RootState) => state.searchbar);
+  const dispatch = useDispatch<AppDispatch>();
+
+  // Local state to store the active filters
+  const [localActiveFilters, setLocalActiveFilters] = useState(activeFilters);
 
   const { updateCategories, updateAuthors } = useNewsService();
 
-  const filtersAreEmpty = (filters: BaseAdapterFetchParams) => {
-    return (
-      (filters.keyword === "" || null) &&
-      (filters.fromDate === null || null) &&
-      (filters.toDate === null || null) &&
-      (filters.category === "" || null) &&
-      (filters.categoryId === "" || null) &&
-      (filters.author === "" || null) &&
-      (filters.authorId === "" || null)
-    );
-  };
-  // Methods
-  const refreshNewsData = useMemo(
-    () =>
-      debounce(async (filters: BaseAdapterFetchParams) => {
-        console.log("New Filters:", filters);
-        const responses = await (filtersAreEmpty(filters)
-          ? newsService.fetchLatestNews()
-          : newsService.fetchFilteredNews(filters));
-        responses.map((r) => {
-          if (r.status === "rejected") {
-            toast.error(
-              `Error fetching news from ${r.reason.adapter.name}, ${r.reason.statusText}`
-            );
-          }
-        });
-        if (responses.every((r) => r.status === "fulfilled")) {
-          toast.success("News fetched successfully");
-        }
-        const filteredArticles: Article[] = responses
-          .filter((r) => r.status === "fulfilled")
-          .reduce((acc, curr) => [...acc, ...curr.value], [] as Article[])
-          .sort((a, b) => {
-            return (
-              new Date(b.publishedAt).getTime() -
-              new Date(a.publishedAt).getTime()
-            );
-          });
-        dispatch(setFilteredArticles(filteredArticles));
-      }, 500),
-    [dispatch]
-  );
+  useEffect(() => {
+    // const filters = getFeedSavedFiltersFromLocalStorage();
+    // if (filters) {
+    // dispatch(setFeedSaved(true));
+    // dispatch(setActiveFilters(filters));
+    // }
+  }, []);
+
+  useEffect(() => {
+    updateCategories(activeFilters);
+    updateAuthors(activeFilters);
+  }, []);
+
+  useEffect(() => {
+    // On page load: Set the local active filters (from the local state) to the active filters (from the Redux store) if the feed is saved
+    if (feedSaved && firstInitialLoad.current) {
+      setLocalActiveFilters(activeFilters);
+      // Set the firstInitialLoad to false after the first render
+      if (firstInitialLoad.current) {
+        firstInitialLoad.current = false;
+      }
+    }
+  }, [feedSaved, activeFilters]);
+
+  // useEffect(() => {
+  // On every change: Debounce the filter changes
+  // if (!firstInitialLoad.current) {
+  //   debouncedHandleFilters(localActiveFilters);
+  // }
+  // Set the firstInitialLoad to false after the first render
+  // }, [localActiveFilters, debouncedHandleFilters, feedSaved]);
 
   // Create a debounced function for handling filter changes
   const debouncedHandleFilters = useMemo(
     () =>
-      debounce((filters: typeof searchbarFilters) => {
-        const params: BaseAdapterFetchParams = {
-          keyword: filters.keyword,
-          // TODO: handle date type
-          fromDate: filters.customDate?.toDate(),
-          toDate: filters.customDate?.toDate(),
-          category:
-            filters?.category?.id === filters?.category?.label
-              ? filters?.category?.label
-              : null,
-          categoryId:
-            filters?.category?.id !== filters?.category?.label
-              ? filters?.category?.id
-              : null,
-          author:
-            filters?.author?.id === filters?.author?.label
-              ? filters?.author?.label
-              : null,
-          authorId:
-            filters?.author?.id !== filters?.author?.label
-              ? filters?.author?.id
-              : null,
-        };
-        refreshNewsData(params);
-        console.log(filters);
+      debounce((filters) => {
+        dispatch(setActiveFilters(processSavedFeedForLocalStorage(filters)));
       }, 500),
-    [refreshNewsData]
+    [dispatch]
   );
 
-  // Effect to handle filter changes
-  useEffect(() => {
-    debouncedHandleFilters(searchbarFilters);
-  }, [searchbarFilters, debouncedHandleFilters]);
-
-  // const updateFilters = (newFilters: BaseAdapterFetchParams) => {
-  //   const updatedFilters = {
-  //     ...filters,
-  //     ...newFilters,
-  //   };
-  //   setFilters(updatedFilters);
-  //   refreshNewsData({});
-  // };
-
   const updateSearchbarFilters = (
-    event: React.ChangeEvent<HTMLInputElement>
+    name: string,
+    value: string | { label: string; id: string } | Dayjs | null
   ) => {
-    setSearchbarFilters({
-      ...searchbarFilters,
-      [event.target.name]: event.target.value,
-    });
+    const updatedFilters = {
+      ...localActiveFilters,
+      [name]: value,
+      ...(name === "dateType" && value !== "custom" && { customDate: null }),
+    };
+    setLocalActiveFilters(updatedFilters);
+    debouncedHandleFilters(updatedFilters);
   };
-
-  useEffect(() => {
-    updateCategories();
-    updateAuthors();
-  }, []);
 
   // Don't render the component if the showSearchBar's value is false
   if (!showSearchBar) return null;
@@ -195,24 +144,17 @@ const Searchbar = () => {
     >
       <SearchbarSave />
       <InputBase
-        value={searchbarFilters.keyword}
+        value={localActiveFilters.keyword}
         name="keyword"
-        onChange={updateSearchbarFilters}
+        onChange={(event) =>
+          updateSearchbarFilters(event.target.name, event.target.value)
+        }
         sx={{ ml: 1, flex: 1 }}
         fullWidth
         placeholder={
           mdAndLowerScreens ? "Search..." : "Search for news, articles & topics"
         }
       />
-      <Tooltip title="Search">
-        <IconButton
-          type="button"
-          sx={{ p: "10px", display: { xs: "none", md: "flex" } }}
-          aria-label="search"
-        >
-          <SearchIcon />
-        </IconButton>
-      </Tooltip>
       <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
       <Tooltip title="Filters">
         <IconButton
@@ -253,14 +195,15 @@ const Searchbar = () => {
             <Grid2 size={{ xs: 12, md: 6 }}>
               <Stack direction="row">
                 <DatePicker
-                  value={searchbarFilters.customDate}
-                  onChange={(date) => {
-                    setSearchbarFilters({
-                      ...searchbarFilters,
-                      customDate: date,
-                    });
-                  }}
-                  disabled={searchbarFilters.dateType !== "custom"}
+                  value={
+                    localActiveFilters.customDate
+                      ? dayjs(localActiveFilters.customDate)
+                      : null
+                  }
+                  onChange={(value) =>
+                    updateSearchbarFilters("customDate", value)
+                  }
+                  disabled={localActiveFilters.dateType !== "custom"}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -275,15 +218,9 @@ const Searchbar = () => {
                   label="Date"
                 />
                 <Select
-                  value={searchbarFilters.dateType}
+                  value={localActiveFilters.dateType}
                   onChange={(e) => {
-                    setSearchbarFilters({
-                      ...searchbarFilters,
-                      ...(searchbarFilters.customDate
-                        ? { customDate: null }
-                        : {}),
-                      dateType: e.target.value,
-                    });
+                    updateSearchbarFilters("dateType", e.target.value);
                   }}
                   sx={{
                     borderTopLeftRadius: 0,
@@ -305,7 +242,7 @@ const Searchbar = () => {
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
               <Autocomplete
-                value={searchbarFilters.sources}
+                value={localActiveFilters.sources}
                 onChange={(
                   _e: React.SyntheticEvent,
                   value: { label: string; id: string }[]
@@ -314,10 +251,7 @@ const Searchbar = () => {
                     toast.error("You must select at least one source");
                     return;
                   }
-                  setSearchbarFilters({
-                    ...searchbarFilters,
-                    sources: value,
-                  });
+                  updateSearchbarFilters("sources", value);
                 }}
                 multiple
                 options={sources}
@@ -347,31 +281,25 @@ const Searchbar = () => {
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
               <Autocomplete
-                value={searchbarFilters.category}
+                value={localActiveFilters.category}
                 onChange={(
                   _e: React.SyntheticEvent,
                   value: { label: string; id: string } | string | null
                 ) => {
                   if (
-                    typeof searchbarFilters.category === "object" &&
-                    searchbarFilters.category?.label === value
+                    typeof localActiveFilters.category === "object" &&
+                    localActiveFilters.category?.label === value
                   ) {
                     return;
                   }
                   if (typeof value === "string") {
-                    setSearchbarFilters({
-                      ...searchbarFilters,
-                      category: {
-                        label: value,
-                        id: value,
-                      },
+                    updateSearchbarFilters("category", {
+                      label: value,
+                      id: value,
                     });
                     return;
                   }
-                  setSearchbarFilters({
-                    ...searchbarFilters,
-                    category: value,
-                  });
+                  updateSearchbarFilters("category", value);
                 }}
                 freeSolo
                 autoSelect
@@ -384,31 +312,25 @@ const Searchbar = () => {
             </Grid2>
             <Grid2 size={{ xs: 12, md: 6 }}>
               <Autocomplete
-                value={searchbarFilters.author}
+                value={localActiveFilters.author}
                 onChange={(
                   _e: React.SyntheticEvent,
                   value: { label: string; id: string } | string | null
                 ) => {
                   if (
-                    typeof searchbarFilters.author === "object" &&
-                    searchbarFilters.author?.label === value
+                    typeof localActiveFilters.author === "object" &&
+                    localActiveFilters.author?.label === value
                   ) {
                     return;
                   }
                   if (typeof value === "string") {
-                    setSearchbarFilters({
-                      ...searchbarFilters,
-                      author: {
-                        label: value,
-                        id: value,
-                      },
+                    updateSearchbarFilters("author", {
+                      label: value,
+                      id: value,
                     });
                     return;
                   }
-                  setSearchbarFilters({
-                    ...searchbarFilters,
-                    author: value,
-                  });
+                  updateSearchbarFilters("author", value);
                 }}
                 freeSolo
                 getOptionKey={(option) => option?.id || option}
