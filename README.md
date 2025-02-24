@@ -7,6 +7,7 @@ A news app built with React that brings together multiple news sources into a si
 - A simple and good user interface and mobile responsive
 - Auto save search filters in local storage and load them when the page is reloaded
 - Adapter for every news source
+- Data processor for every news source
 - Real-time search with debounce for better performance and less api requests
 - Filtering options:
   - Search query (in title, description, content or fields provided by the source)
@@ -66,3 +67,13 @@ npm install
 ```bash
 npm run dev
 ```
+
+## Project built with the following technologies
+
+- React 18
+- TypeScript
+- Material UI
+- Redux Toolkit
+- Day.js
+- Vite
+- ESLint
