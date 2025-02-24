@@ -1,50 +1,67 @@
-# React + TypeScript + Vite
+# The Daily News 📰
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A news app built with React that brings together multiple news sources into a single place.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Adapter for every news source
+- Real-time search with debounce for better performance and less api requests
+- Filtering options:
+  - Search query (in title, description, content or fields provided by the source)
+  - Date range (if source supports it)
+  - Source (at least 1 source is required)
+  - Category (if source supports it)
+  - Author (if source supports it)
+- A simple and good user interface and mobile responsive
 
-## Expanding the ESLint configuration
+## Before you start
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Copy the `.env.example` file in the root directory and rename it to `.env`. then add your api keys for the sources you want to use.
 
-- Configure the top-level `parserOptions` property like this:
+#### Sources provided by the app
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- [NewsAPI](https://newsapi.org/)
+- [New York Times](https://developer.nytimes.com/)
+- [Guardian](https://open-platform.theguardian.com/)
+
+#### Then choose one of the following sections to run the app
+
+1. Run with Docker
+
+2. For Development
+
+## Run with Docker
+
+1. Install [Docker](https://docs.docker.com/get-docker/) based on your OS
+
+2. Build the Docker image:
+
+```bash
+docker build -t the-daily-news:latest .
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+3. Run the container:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+```bash
+docker run -d -p 8080:8080 the-daily-news:latest
+```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+4. Open your browser and navigate to:
+
+```
+http://localhost:8080/
+```
+
+## For Development
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Start vite development server
+
+```bash
+npm run dev
 ```
