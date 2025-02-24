@@ -4,6 +4,8 @@ A news app built with React that brings together multiple news sources into a si
 
 ## Features
 
+- A simple and good user interface and mobile responsive
+- Auto save search filters in local storage and load them when the page is reloaded
 - Adapter for every news source
 - Real-time search with debounce for better performance and less api requests
 - Filtering options:
@@ -12,7 +14,6 @@ A news app built with React that brings together multiple news sources into a si
   - Source (at least 1 source is required)
   - Category (if source supports it)
   - Author (if source supports it)
-- A simple and good user interface and mobile responsive
 
 ## Before you start
 
