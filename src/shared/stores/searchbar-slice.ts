@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Article } from "@/shared/services/news/types";
 import { Dayjs } from "dayjs";
 import { getFeedSavedFiltersFromLocalStorage } from "../utils";
+
 interface SearchbarInitialState {
   isLoading: boolean;
   showSearchBar: boolean;
@@ -11,15 +12,17 @@ interface SearchbarInitialState {
   authors: { label: string; id: string }[];
   filteredArticles: Article[];
   quickFilterCategoryName: string;
-  activeFilters: {
-    keyword: string | null;
-    customDate: Dayjs | null | string | undefined;
-    dateType: string | null;
-    sources: { label: string; id: string }[];
-    category: { label: string; id: string } | string | null;
-    author: { label: string; id: string } | string | null;
-  };
+  activeFilters: ActiveFilters;
 }
+
+export type ActiveFilters = {
+  keyword: string | null;
+  customDate: Dayjs | null | string | undefined;
+  dateType: string | null;
+  sources: { label: string; id: string }[];
+  category: { label: string; id: string } | string | null;
+  author: { label: string; id: string } | string | null;
+};
 
 const feedSavedFiltersInLocalStorage = getFeedSavedFiltersFromLocalStorage();
 

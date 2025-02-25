@@ -57,7 +57,7 @@ export class NewsService {
           const response = await adapter.fetchLatest();
           const data = await response.json();
           if (response.ok) {
-            return await adapter.processor(data);
+            return (await adapter.processor(data, "article")) as Article[];
           } else {
             return Promise.reject({
               status: response.status,
@@ -84,7 +84,7 @@ export class NewsService {
           const response = await adapter.fetchFiltered(filters);
           const data = await response.json();
           if (response.ok) {
-            return await adapter.processor(data);
+            return (await adapter.processor(data, "article")) as Article[];
           } else {
             return Promise.reject({
               status: response.status,
@@ -101,18 +101,21 @@ export class NewsService {
   }
 
   async fetchCategories(
-    adapters: string[]
+    adapters: string[] | undefined
   ): Promise<PromiseSettledResult<{ id: string; label: string }[]>[]> {
     return await Promise.allSettled(
       this.adapters
-        .filter((adapter) => adapters.includes(adapter.id))
+        .filter((adapter) => adapters?.includes(adapter.id))
         .filter((adapter) => typeof adapter.fetchCategories === "function")
         .map(async (adapter) => {
           if (typeof adapter.fetchCategories === "function") {
             const response = await adapter.fetchCategories();
             const data = await response.json();
             if (response.ok) {
-              return await adapter.processor(data, "category");
+              return (await adapter.processor(data, "category")) as {
+                id: string;
+                label: string;
+              }[];
             } else {
               return Promise.reject({
                 status: response.status,
@@ -131,18 +134,21 @@ export class NewsService {
   }
 
   async fetchAuthors(
-    adapters: string[]
+    adapters: string[] | undefined
   ): Promise<PromiseSettledResult<{ id: string; label: string }[]>[]> {
     return await Promise.allSettled(
       this.adapters
-        .filter((adapter) => adapters.includes(adapter.id))
+        .filter((adapter) => adapters?.includes(adapter.id))
         .filter((adapter) => typeof adapter.fetchAuthors === "function")
         .map(async (adapter) => {
           if (typeof adapter.fetchAuthors === "function") {
             const response = await adapter.fetchAuthors();
             const data = await response.json();
             if (response.ok) {
-              return await adapter.processor(data, "author");
+              return (await adapter.processor(data, "author")) as {
+                id: string;
+                label: string;
+              }[];
             } else {
               return Promise.reject({
                 status: response.status,

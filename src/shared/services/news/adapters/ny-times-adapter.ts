@@ -7,6 +7,9 @@ import {
 } from "../types";
 
 export class NyTimesAdapter extends BaseAdapter<NyTimesResponse> {
+  fetchCategories: undefined;
+  fetchAuthors: undefined;
+
   constructor(
     name: string,
     id: string,
@@ -36,7 +39,7 @@ export class NyTimesAdapter extends BaseAdapter<NyTimesResponse> {
     );
   }
 
-  private processDate(date: Date): string {
+  private processDate(date: Date | string): string {
     return dayjs(date).format("YYYYMMDD");
   }
 

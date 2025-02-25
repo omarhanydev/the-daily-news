@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Paper,
   Tooltip,
@@ -20,23 +20,14 @@ import {
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import TuneIcon from "@mui/icons-material/Tune";
-import SearchIcon from "@mui/icons-material/Search";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import {
-  AppDispatch,
-  RootState,
-  setActiveFilters,
-  setFeedSaved,
-} from "@/shared/stores";
+import { AppDispatch, RootState, setActiveFilters } from "@/shared/stores";
 import { SearchbarSave } from "./searchbar-save";
 import toast from "react-hot-toast";
 import dayjs, { Dayjs } from "dayjs";
-import {
-  processSavedFeedForLocalStorage,
-  getFeedSavedFiltersFromLocalStorage,
-} from "@/shared/utils";
+import { processSavedFeedForLocalStorage } from "@/shared/utils";
 import { useNewsService } from "@/shared/hooks";
 
 const Searchbar = () => {
@@ -71,14 +62,6 @@ const Searchbar = () => {
   const { updateCategories, updateAuthors } = useNewsService();
 
   useEffect(() => {
-    // const filters = getFeedSavedFiltersFromLocalStorage();
-    // if (filters) {
-    // dispatch(setFeedSaved(true));
-    // dispatch(setActiveFilters(filters));
-    // }
-  }, []);
-
-  useEffect(() => {
     updateCategories(activeFilters);
     updateAuthors(activeFilters);
   }, []);
@@ -94,14 +77,6 @@ const Searchbar = () => {
     }
   }, [feedSaved, activeFilters]);
 
-  // useEffect(() => {
-  // On every change: Debounce the filter changes
-  // if (!firstInitialLoad.current) {
-  //   debouncedHandleFilters(localActiveFilters);
-  // }
-  // Set the firstInitialLoad to false after the first render
-  // }, [localActiveFilters, debouncedHandleFilters, feedSaved]);
-
   // Create a debounced function for handling filter changes
   const debouncedHandleFilters = useMemo(
     () =>
@@ -113,7 +88,12 @@ const Searchbar = () => {
 
   const updateSearchbarFilters = (
     name: string,
-    value: string | { label: string; id: string } | Dayjs | null
+    value:
+      | string
+      | { label: string; id: string }
+      | { label: string; id: string }[]
+      | Dayjs
+      | null
   ) => {
     const updatedFilters = {
       ...localActiveFilters,
@@ -303,7 +283,9 @@ const Searchbar = () => {
                 }}
                 freeSolo
                 autoSelect
-                getOptionKey={(option) => option?.id || option}
+                getOptionKey={(option) =>
+                  typeof option === "object" ? option?.id : option
+                }
                 options={categories}
                 renderInput={(params) => (
                   <TextField {...params} label="Category" />
@@ -333,7 +315,9 @@ const Searchbar = () => {
                   updateSearchbarFilters("author", value);
                 }}
                 freeSolo
-                getOptionKey={(option) => option?.id || option}
+                getOptionKey={(option) =>
+                  typeof option === "object" ? option?.id : option
+                }
                 autoSelect
                 options={authors}
                 renderInput={(params) => (

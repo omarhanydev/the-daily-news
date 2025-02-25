@@ -33,14 +33,14 @@ export abstract class BaseAdapter<T = any> {
 }
 
 export type BaseAdapterFetchParams = {
-  keyword?: string;
-  fromDate?: Date;
-  toDate?: Date;
-  category?: string;
-  categoryId?: string;
-  author?: string;
-  authorId?: string;
-  page?: number;
+  keyword?: string | null;
+  fromDate?: Date | string | null;
+  toDate?: Date | string | null;
+  category?: string | null;
+  categoryId?: string | null;
+  author?: string | null;
+  authorId?: string | null;
+  page?: number | null;
 };
 
 export type Article = {
@@ -108,7 +108,7 @@ type TheGuardianArticleTag = {
   twitterHandle?: string;
 };
 
-export type TheGuardianCategoriesResponse = {
+export type TheGuardianCategoriesAuthorsResponse = {
   response: {
     status: string;
     userTier: string;

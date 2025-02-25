@@ -6,9 +6,10 @@ import {
   setAuthors,
   setFilteredArticles,
   setIsLoading,
+  ActiveFilters,
 } from "@/shared/stores/searchbar-slice";
 import { newsService } from "@/shared/services/news/news-service";
-import { Article, BaseAdapterFetchParams } from "@/shared/services/news/types";
+import { Article } from "@/shared/services/news/types";
 import toast from "react-hot-toast";
 import { processFiltersToServiceFilters } from "../utils";
 
@@ -16,9 +17,9 @@ const useNewsService = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const updateNews = useCallback(
-    async (filters?: BaseAdapterFetchParams) => {
+    async (filters: ActiveFilters) => {
       dispatch(setIsLoading(true));
-      const filtersAreEmpty = (filters: BaseAdapterFetchParams) => {
+      const filtersAreEmpty = (filters: ActiveFilters) => {
         return (
           JSON.stringify(filters) ===
           JSON.stringify({
@@ -37,10 +38,10 @@ const useNewsService = () => {
       };
 
       const responses = await (filtersAreEmpty(filters)
-        ? newsService.fetchLatestNews(filters?.sources.map((s) => s.id))
+        ? newsService.fetchLatestNews(filters.sources.map((s) => s.id))
         : newsService.fetchFilteredNews(
             processFiltersToServiceFilters(filters),
-            filters?.sources.map((s) => s.id)
+            filters.sources.map((s) => s.id)
           ));
 
       responses.map((r) => {
@@ -74,7 +75,7 @@ const useNewsService = () => {
   );
 
   const updateCategories = useCallback(
-    async (filters?: BaseAdapterFetchParams) => {
+    async (filters?: ActiveFilters) => {
       const responses = await newsService.fetchCategories(
         filters?.sources.map((s) => s.id)
       );
@@ -97,7 +98,13 @@ const useNewsService = () => {
         ...new Map(
           responses
             .filter((r) => r.status === "fulfilled")
-            .reduce((acc, curr) => [...acc, ...curr.value], [])
+            .reduce(
+              (acc: { id: string; label: string }[], curr) => [
+                ...acc,
+                ...curr.value,
+              ],
+              []
+            )
             .map((item) => [item.id, item])
         ).values(),
       ];
@@ -108,7 +115,7 @@ const useNewsService = () => {
   );
 
   const updateAuthors = useCallback(
-    async (filters?: BaseAdapterFetchParams) => {
+    async (filters?: ActiveFilters) => {
       const responses = await newsService.fetchAuthors(
         filters?.sources.map((s) => s.id)
       );
@@ -131,7 +138,13 @@ const useNewsService = () => {
         ...new Map(
           responses
             .filter((r) => r.status === "fulfilled")
-            .reduce((acc, curr) => [...acc, ...curr.value], [])
+            .reduce(
+              (acc: { id: string; label: string }[], curr) => [
+                ...acc,
+                ...curr.value,
+              ],
+              []
+            )
             .map((item) => [item.id, item])
         ).values(),
       ];

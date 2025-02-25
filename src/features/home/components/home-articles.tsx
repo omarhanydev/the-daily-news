@@ -11,15 +11,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { RootState, setActiveFilters } from "@/shared/stores";
+import { RootState } from "@/shared/stores";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 import ErrorIcon from "@mui/icons-material/Error";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/shared/stores";
 import { useNewsService } from "@/shared/hooks/useNewsService";
 const HomeArticles = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const {
     filteredArticles,
     quickFilterCategoryName,

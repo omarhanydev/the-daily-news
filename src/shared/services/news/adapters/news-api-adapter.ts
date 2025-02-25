@@ -7,6 +7,9 @@ import {
 } from "../types";
 
 export class NewsApiAdapter extends BaseAdapter<NewsApiResponse> {
+  fetchCategories: undefined;
+  fetchAuthors: undefined;
+
   constructor(
     name: string,
     id: string,
@@ -40,7 +43,7 @@ export class NewsApiAdapter extends BaseAdapter<NewsApiResponse> {
     );
   }
 
-  private processDate(date: Date): string {
+  private processDate(date: Date | string): string {
     return dayjs(date).format("YYYY-MM-DD");
   }
 

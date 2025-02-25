@@ -1,7 +1,11 @@
-import { Article, TheGuardianResponse, TheGuardianCategoriesResponse } from "../types";
+import {
+  Article,
+  TheGuardianResponse,
+  TheGuardianCategoriesAuthorsResponse,
+} from "../types";
 
 export const TheGuardianProcessor = async (
-  data: TheGuardianResponse | TheGuardianCategoriesResponse,
+  data: TheGuardianResponse | TheGuardianCategoriesAuthorsResponse,
   type: "article" | "category" | "author" = "article"
 ): Promise<Article[] | { label: string; id: string }[]> => {
   return new Promise((resolve) => {
@@ -9,7 +13,7 @@ export const TheGuardianProcessor = async (
     const categories: { label: string; id: string }[] = [];
     switch (type) {
       case "article":
-        data?.response?.results?.map((record) => {
+        (data as TheGuardianResponse)?.response?.results?.map((record) => {
           articles.push({
             id: record.id,
             author: record.fields?.byline,
@@ -30,12 +34,14 @@ export const TheGuardianProcessor = async (
         break;
       case "category":
       case "author":
-        data?.response?.results?.map((record) => {
-          categories.push({
-            id: record.id,
-            label: record.webTitle,
-          });
-        });
+        (data as TheGuardianCategoriesAuthorsResponse)?.response?.results?.map(
+          (record) => {
+            categories.push({
+              id: record.id,
+              label: record.webTitle,
+            });
+          }
+        );
         resolve(categories);
         break;
     }

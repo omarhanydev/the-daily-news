@@ -1,18 +1,12 @@
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import { ActiveFilters } from "@/shared/stores";
 
-const processFiltersToServiceFilters = (data: {
-  keyword: string;
-  customDate: Dayjs | string | null;
-  dateType: string;
-  sources: { label: string; id: string }[];
-  category: { label: string; id: string };
-  author: { label: string; id: string };
-}) => {
-  const { keyword, customDate, dateType, sources, category, author } = data;
+const processFiltersToServiceFilters = (data: ActiveFilters) => {
+  const { keyword, customDate, dateType, category, author } = data;
 
   const fromDate = () => {
     if (customDate) {
-      return new Date(customDate).toISOString();
+      return dayjs(customDate).toISOString();
     } else if (dateType === "past-hour") {
       return dayjs().subtract(1, "hour").toDate().toISOString();
     } else if (dateType === "past-day") {
@@ -29,7 +23,7 @@ const processFiltersToServiceFilters = (data: {
 
   const toDate = () => {
     if (customDate) {
-      return new Date(customDate).toISOString();
+      return dayjs(customDate).toISOString();
     }
     return null;
   };
@@ -38,10 +32,22 @@ const processFiltersToServiceFilters = (data: {
     keyword,
     fromDate: fromDate(),
     toDate: toDate(),
-    category: category?.id === category?.label ? category?.label : null,
-    categoryId: category?.id !== category?.label ? category?.id : null,
-    author: author?.id === author?.label ? author?.label : null,
-    authorId: author?.id !== author?.label ? author?.id : null,
+    category:
+      typeof category === "object" && category?.id === category?.label
+        ? category?.label
+        : null,
+    categoryId:
+      typeof category === "object" && category?.id !== category?.label
+        ? category?.id
+        : null,
+    author:
+      typeof author === "object" && author?.id === author?.label
+        ? author?.label
+        : null,
+    authorId:
+      typeof author === "object" && author?.id !== author?.label
+        ? author?.id
+        : null,
   };
 };
 

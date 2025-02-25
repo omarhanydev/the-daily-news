@@ -11,7 +11,10 @@ export class TheGuardianAdapter extends BaseAdapter<TheGuardianResponse> {
     name: string,
     id: string,
     apiKey: string,
-    processor: (data: TheGuardianResponse) => Promise<Article[]>
+    processor: (
+      data: TheGuardianResponse,
+      type: "article" | "category" | "author"
+    ) => Promise<Article[] | { label: string; id: string }[]>
   ) {
     super(name, id, apiKey, processor);
   }
@@ -54,7 +57,7 @@ export class TheGuardianAdapter extends BaseAdapter<TheGuardianResponse> {
     );
   }
 
-  private processDate(date: Date): string {
+  private processDate(date: Date | string): string {
     return dayjs(date).format("YYYY-MM-DD");
   }
 
