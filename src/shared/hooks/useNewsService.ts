@@ -37,7 +37,7 @@ const useNewsService = () => {
       responses.map((r) => {
         if (r.status === "rejected") {
           toast.error(
-            `Error fetching news from ${r.reason.adapter.name}, ${
+            `Error fetching news${r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""}, ${
               r.reason.statusText || r.reason?.data?.message
             }`
           );
@@ -74,7 +74,7 @@ const useNewsService = () => {
       responses.map((r) => {
         if (r.status === "rejected") {
           toast.error(
-            `Error fetching categories from ${r.reason.adapter.name}, ${
+            `Error fetching categories${r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""}, ${
               r.reason.statusText || r.reason?.data?.message
             }`
           );
@@ -115,7 +115,7 @@ const useNewsService = () => {
       responses.map((r) => {
         if (r.status === "rejected") {
           toast.error(
-            `Error fetching authors from ${r.reason.adapter.name}, ${
+            `Error fetching authors${r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""}, ${
               r.reason.statusText || r.reason?.data?.message
             }`
           );
