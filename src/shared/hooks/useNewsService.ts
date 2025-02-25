@@ -36,10 +36,14 @@ const useNewsService = () => {
 
       responses.map((r) => {
         if (r.status === "rejected") {
+          const errorMessage =
+            r?.reason?.statusText ||
+            r?.reason?.data?.message ||
+            "Unknown error";
           toast.error(
-            `Error fetching news${r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""}, ${
-              r.reason.statusText || r.reason?.data?.message
-            }`
+            `Error fetching news${
+              r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""
+            }, ${errorMessage}`
           );
         }
       });
@@ -73,10 +77,14 @@ const useNewsService = () => {
 
       responses.map((r) => {
         if (r.status === "rejected") {
+          const errorMessage =
+            r?.reason?.statusText ||
+            r?.reason?.data?.message ||
+            "Unknown error";
           toast.error(
-            `Error fetching categories${r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""}, ${
-              r.reason.statusText || r.reason?.data?.message
-            }`
+            `Error fetching categories${
+              r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""
+            }, ${errorMessage}`
           );
         }
       });
@@ -114,10 +122,14 @@ const useNewsService = () => {
 
       responses.map((r) => {
         if (r.status === "rejected") {
+          const errorMessage =
+            r?.reason?.statusText ||
+            r?.reason?.data?.message ||
+            "Unknown error";
           toast.error(
-            `Error fetching authors${r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""}, ${
-              r.reason.statusText || r.reason?.data?.message
-            }`
+            `Error fetching authors${
+              r.reason?.adapter?.name ? ` from ${r.reason.adapter.name}` : ""
+            }, ${errorMessage}`
           );
         }
       });
