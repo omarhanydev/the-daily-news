@@ -24,6 +24,19 @@ export type ActiveFilters = {
   author: { label: string; id: string } | string | null;
 };
 
+export const defaultActiveFilters: ActiveFilters = {
+  keyword: "",
+  customDate: null,
+  dateType: "latest",
+  sources: [
+    { label: "The Guardian", id: "the-guardian" },
+    { label: "NY Times", id: "ny-times" },
+    { label: "News API", id: "news-api" },
+  ],
+  category: "",
+  author: "",
+};
+
 const feedSavedFiltersInLocalStorage = getFeedSavedFiltersFromLocalStorage();
 
 const initialState: SearchbarInitialState = {
@@ -39,18 +52,7 @@ const initialState: SearchbarInitialState = {
   authors: [],
   filteredArticles: [],
   quickFilterCategoryName: "",
-  activeFilters: feedSavedFiltersInLocalStorage || {
-    keyword: "",
-    customDate: null,
-    dateType: "latest",
-    sources: [
-      { label: "The Guardian", id: "the-guardian" },
-      { label: "NY Times", id: "ny-times" },
-      { label: "News API", id: "news-api" },
-    ],
-    category: "",
-    author: "",
-  },
+  activeFilters: feedSavedFiltersInLocalStorage || defaultActiveFilters,
 };
 
 const searchbarSlice = createSlice({

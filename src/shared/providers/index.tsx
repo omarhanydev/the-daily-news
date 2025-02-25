@@ -1,11 +1,10 @@
 import { MuiDateLocalizationProvider } from "@/shared/providers/mui-date-localization-provider";
 import { MuiThemeProvider } from "@/shared/providers/mui-theme-provider";
-import { ReduxStoreProvider } from "./redux-store-provider";
+import { ReduxStoreProvider } from "@/shared/providers/redux-store-provider";
 import { WrapperComponentProps } from "@/shared/types";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import { dayjsInit } from "./dayjs-init";
 
-dayjs.extend(relativeTime);
+dayjsInit();
 
 const Providers = ({ children }: WrapperComponentProps) => {
   return (

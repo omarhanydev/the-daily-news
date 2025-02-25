@@ -6,20 +6,28 @@ import {
   HomeArticles,
   HomeNavbar,
 } from "@/features/home/components";
-import { AppDispatch, RootState, ActiveFilters } from "@/shared/stores";
-import { setShowSearchBar } from "@/shared/stores/searchbar-slice";
+import {
+  AppDispatch,
+  RootState,
+  ActiveFilters,
+  setShowSearchBar,
+} from "@/shared/stores";
 import { useNewsService } from "@/shared/hooks";
 
 const Home = () => {
+  // Redux
   const dispatch = useDispatch<AppDispatch>();
   const { activeFilters } = useSelector((state: RootState) => state.searchbar);
+
+  // News custom hook for updating news based on active filters
   const { updateNews } = useNewsService();
 
-  // Show search bar and update news based on feed saved filters or update latest news
+  // Show search bar (on load)
   useEffect(() => {
     dispatch(setShowSearchBar(true));
   }, [dispatch]);
 
+  // Update news (on load & when active filters change)
   useEffect(() => {
     updateNews(activeFilters as ActiveFilters);
   }, [dispatch, updateNews, activeFilters]);

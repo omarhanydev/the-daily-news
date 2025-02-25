@@ -1,22 +1,14 @@
-import {
-  Box,
-  Typography,
-  Grid2,
-  Card,
-  CardContent,
-  Link,
-  CardMedia,
-  CardActions,
-  Button,
-  CircularProgress,
-} from "@mui/material";
-import { useSelector } from "react-redux";
-import { RootState } from "@/shared/stores";
-import dayjs from "dayjs";
 import { useMemo } from "react";
-import ErrorIcon from "@mui/icons-material/Error";
+import { Box, Grid2 } from "@mui/material";
+import { useSelector } from "react-redux";
+import { ArticleCard } from "@/features/articles/components/article-card";
+import { RootState } from "@/shared/stores";
 import { useNewsService } from "@/shared/hooks/useNewsService";
+import { HomeArticlesEmpty } from "@/features/home/components/home-articles/home-articles-empty";
+import { HomeArticlesLoading } from "@/features/home/components/home-articles/home-articles-loading";
+
 const HomeArticles = () => {
+  // Redux
   const {
     filteredArticles,
     quickFilterCategoryName,
@@ -24,8 +16,10 @@ const HomeArticles = () => {
     isLoading,
   } = useSelector((state: RootState) => state.searchbar);
 
+  // News custom hook (updating news based on active filters)
   const { updateNews } = useNewsService();
 
+  // Computed filtered articles (based on quick filter category name tabs)
   const computedFilteredArticles = useMemo(() => {
     return filteredArticles.filter((article) => {
       if (quickFilterCategoryName === "") {
@@ -52,134 +46,15 @@ const HomeArticles = () => {
               }}
               key={article.id}
             >
-              <Card
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  textDecoration: "none",
-                  height: "100%",
-                  borderRadius: "16px",
-                  boxShadow: "0 0 2px 1px rgba(0, 0, 0, 0.02)",
-                  "&:hover": {
-                    boxShadow:
-                      "0 0 0 2px #1989fa, 0 0 12px 3px rgba(0, 0, 0, 0.1)",
-                  },
-                }}
-                elevation={0}
-                component={Link}
-                target="_blank"
-                href={article.url}
-              >
-                {article.image && (
-                  <CardMedia
-                    sx={{
-                      paddingTop: "56.25%",
-                    }}
-                    image={article.image}
-                    title={article.title}
-                  />
-                )}
-                <CardContent
-                  {...(!article.description
-                    ? {
-                        sx: {
-                          marginTop: "auto",
-                        },
-                      }
-                    : {})}
-                >
-                  <Typography
-                    gutterBottom
-                    {...(!article.description
-                      ? {
-                          variant: "h4",
-                          ...(!article.image && {
-                            sx: {
-                              textAlign: "center",
-                            },
-                          }),
-                        }
-                      : {
-                          variant: "h6",
-                        })}
-                  >
-                    {article.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {article.description}
-                  </Typography>
-                </CardContent>
-                <CardActions
-                  sx={{
-                    marginTop: "auto",
-                    padding: 2,
-                    gap: 2,
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ mt: 1, display: "block" }}
-                  >
-                    {dayjs(article.publishedAt).fromNow()} • {article.source}
-                    {article.author && ` • By ${article.author}`}
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    sx={{ flexShrink: 0, textTransform: "none" }}
-                  >
-                    Read More
-                  </Button>
-                </CardActions>
-              </Card>
+              <ArticleCard article={article} />
             </Grid2>
           ))}
           {computedFilteredArticles.length === 0 && !isLoading && (
-            <Grid2 size={{ xs: 12 }}>
-              <Box
-                sx={{
-                  textAlign: "center",
-                  background: "white",
-                  maxWidth: "400px",
-                  padding: 4,
-                  borderRadius: "16px",
-                  margin: "0 auto",
-                  color: "text.secondary",
-                }}
-              >
-                <ErrorIcon sx={{ fontSize: 48 }} />
-                <Typography variant="h6">No articles found</Typography>
-                <Button
-                  variant="outlined"
-                  sx={{ mt: 2, textTransform: "none" }}
-                  color="primary"
-                  onClick={() => {
-                    updateNews(activeFilters);
-                  }}
-                >
-                  Try again
-                </Button>
-              </Box>
-            </Grid2>
+            <HomeArticlesEmpty
+              tryAgainBtnOnClick={() => updateNews(activeFilters)}
+            />
           )}
-          {isLoading && (
-            <Grid2 size={{ xs: 12 }}>
-              <Box
-                sx={{
-                  textAlign: "center",
-                  background: "white",
-                  maxWidth: "400px",
-                  padding: 4,
-                  borderRadius: "16px",
-                  margin: "0 auto",
-                  color: "text.secondary",
-                }}
-              >
-                <CircularProgress />
-              </Box>
-            </Grid2>
-          )}
+          {isLoading && <HomeArticlesLoading />}
         </Grid2>
       </Box>
     </>

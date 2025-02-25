@@ -1,40 +1,30 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/shared/stores";
+import toast from "react-hot-toast";
 import {
+  AppDispatch,
   setCategories,
   setAuthors,
   setFilteredArticles,
   setIsLoading,
   ActiveFilters,
-} from "@/shared/stores/searchbar-slice";
+  defaultActiveFilters,
+} from "@/shared/stores";
 import { newsService } from "@/shared/services/news/news-service";
+import { processFiltersToServiceFilters } from "@/shared/utils";
 import { Article } from "@/shared/services/news/types";
-import toast from "react-hot-toast";
-import { processFiltersToServiceFilters } from "../utils";
 
 const useNewsService = () => {
+  // Redux
   const dispatch = useDispatch<AppDispatch>();
 
+  // Methods
+  // Update news based on active filters
   const updateNews = useCallback(
     async (filters: ActiveFilters) => {
       dispatch(setIsLoading(true));
       const filtersAreEmpty = (filters: ActiveFilters) => {
-        return (
-          JSON.stringify(filters) ===
-          JSON.stringify({
-            keyword: "",
-            customDate: null,
-            dateType: "latest",
-            sources: [
-              { label: "The Guardian", id: "the-guardian" },
-              { label: "NY Times", id: "ny-times" },
-              { label: "News API", id: "news-api" },
-            ],
-            category: "",
-            author: "",
-          })
-        );
+        return JSON.stringify(filters) === JSON.stringify(defaultActiveFilters);
       };
 
       const responses = await (filtersAreEmpty(filters)
@@ -74,6 +64,7 @@ const useNewsService = () => {
     [dispatch]
   );
 
+  // Update categories
   const updateCategories = useCallback(
     async (filters?: ActiveFilters) => {
       const responses = await newsService.fetchCategories(
@@ -114,6 +105,7 @@ const useNewsService = () => {
     [dispatch]
   );
 
+  // Update authors
   const updateAuthors = useCallback(
     async (filters?: ActiveFilters) => {
       const responses = await newsService.fetchAuthors(
