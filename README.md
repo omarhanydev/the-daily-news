@@ -1,6 +1,9 @@
 # The Daily News 📰
 
 A news app built with React that brings together multiple news sources into a single place.
+#### (Built with adapter design pattern)
+
+---
 
 ## Features
 
